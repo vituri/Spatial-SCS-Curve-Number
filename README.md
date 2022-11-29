@@ -1,4 +1,4 @@
-Spatial SCS Curve Number
+# Spatial SCS Curve Number
 
 The first step to applying the SCS method stat with the Curve Number (CN) calculation, in this example I used the land cover classification of the MamBiomas project (https://mapbiomas.org/) and map soil texture from Agronomical Institute o Campina (IAC) to the São Paulo State area to produce a spatial CN using the terra package.
 
