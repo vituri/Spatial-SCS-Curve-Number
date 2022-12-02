@@ -53,7 +53,7 @@ rc_map_scs[rc_map_scs <= 0] = NA
 #plot(rc_map_scs$classification_2000, type = "classes")
 
 
-###################soil raster ###############
+################### Soil raster ###############
 
 #SCS Soil group from SCS method	A= (1)	B= (2)	C= (3)	D= (4) 
 # In this case the raster was converted before
@@ -71,7 +71,7 @@ sum_soil_uses = Soil_resample + rc_map_scs
 #plot(sum_soil_uses$lyr1, type = "classes")
 
 
-#####################Cn final##########################
+#####################CN final##########################
 
 # Values based in the method => https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb1044171.pdf
 
@@ -86,7 +86,7 @@ sum_soil_uses = Soil_resample + rc_map_scs
 #	Pasture	      39	61	74	80
 #	No Data	      0	  0	  0	  0
 
-#	Sum Soil and Land Use -> to Reclassify				
+#	Sum Soil and Land Use -> to reclassify using the SCS values above				
 #	Uses/Soil	    A	  B	  C	  D
 #	Urban	        11	12	13	14
 #	Crops	        21	22	23	24
