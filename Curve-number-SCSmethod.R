@@ -3,10 +3,8 @@
 #(https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb1044171.pdf)
 
 #Data:
-  #Land use from the Landsat collection, from GEE: https://mapbiomas.org/
-  #Soil map, processed in GIS providing soil classes and rasterized: www.iflorestal.sp.gov.br
-
-
+  #Land use from the Mapbiomas Landsat classification collection, from GEE: https://mapbiomas.org/
+  
 library(terra)    
 
 dir.create(path = 'temp', showWarnings = FALSE) #To create a temp directory to exclude in the final
@@ -23,10 +21,9 @@ grid_standard = terra::rast(xmin=-49.270, xmax =-48.843, ymin =-21.490, ymax =-2
 #Reduce the amount of data for easier processing, adjustable as needed (grid). 
 mapbio_resample = terra::resample(uses_orig, grid_standard, method="near") 
 
-#plot(mapbio_resample$classification_2000, type = "classes")
+# Values reclass/Land use	----- (MAPBIOMAS) 
+# There are different classes depending on the collection. 
 
-
-#Values reclass/Land use	----- (MAPBIOMAS)
 #10	Urban (24)
 #20	Agriculture (18, 19, 20, 21, 36, 39, 41)
 #30	Forest (3, 4, 5)
@@ -55,12 +52,63 @@ rc_map_scs[rc_map_scs <= 0] = NA
 
 ################### Soil raster ###############
 
-#SCS Soil group from SCS method	A= (1)	B= (2)	C= (3)	D= (4) 
-# In this case the raster was converted before
+#SCS Soil group from SCS method	A = (1)	B = (2)	C = (3)	D = (4) 
+# Layers from Soil Grid
+# See my script to download in Google Earth Engine
+# https://github.com/lvsantarosa/Soil-Grid-on-Google-Earth-Engine
 
-soil = rast("MAPBIOMAS-EXPORT/Solo_resampled.tif")
+Clay <- terra::rast('clay.tif')
+Sand <- terra::rast('sand.tif')
+Silt <- terra::rast('silt.tif')
 
-Soil_resample= terra::resample(soil, grid_standard, method="near")
+#Convert to percentage
+
+Clay <- terra::mean(Clay)/1000
+Sand <- terra::mean(Sand)/1000
+Silt <- terra::mean(Silt)/1000
+
+# Reclassify the values into groups occording to textural triangle
+# https://hess.copernicus.org/preprints/hess-2017-13/hess-2017-13.pdf
+
+Sand_m <- matrix(c(0.55, 1   , 10,
+                   0.01, 0.55, 20), ncol = 3, byrow=TRUE)
+
+Sand_rec <- classify(Sand, Sand_m, include.lowest=TRUE)
+
+
+Clay_m <- matrix(c(0.01, 0.25, 100,
+                   0.25, 0.35, 200,
+                   0.35, 1   , 300), ncol = 3, byrow=TRUE)
+
+Clay_rec <- classify(Clay, Clay_m, include.lowest=TRUE)
+
+
+Silt_m <- matrix(c(0.01, 0.75, 1000,
+                   0.75, 1   , 2000), ncol = 3, byrow=TRUE)
+
+Silt_rec <- classify(Silt, Silt_m, include.lowest=TRUE)
+
+
+#Sum the values
+Sum_ly <- Sand_rec + Clay_rec + Silt_rec
+
+#Discriminate the groups based in the sum result
+grupos <- rbind(c(1110, 1),
+                c(1220, 1),
+                c(1310, 1),
+                c(1120, 2),
+                c(2120, 2),
+                c(1210, 3),
+                c(1320, 4))
+
+Soil_Hidro <- classify(Sum_ly, grupos)
+
+crs <- "+proj=longlat +datum=WGS84"
+Soil_Hidro <- project(Soil_Hidro, crs)
+
+#terra::writeRaster(Soil_Hidro, "Soil_Hidro.tif", overwrite = TRUE)
+
+Soil_resample= resample(Soil_Hidro, grid_standard, method="near")
 
 Soil_resample[Soil_resample <= 0] = NA
 
