@@ -173,4 +173,4 @@ filename = glue("Results/CN_{Nomes}.tif")
 cn_final %>% writeRaster(filename = filename, overwrite = TRUE)
 
 ###########################################################
-unlink(x = list.files('temp', full.names = TRUE)) #apaga os temporararios
+unlink(x = list.files('temp', full.names = TRUE)) #Delete the temp
