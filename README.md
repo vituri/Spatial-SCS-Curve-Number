@@ -7,6 +7,6 @@ The complete SCS Methodis disponible in the documents of USDA https://www.nrcs.u
 ### The dataset to test are in this link:
 https://drive.google.com/drive/folders/18IXMdb04XiotG8TqD081JJGZex7gmJFP?usp=sharing
 
-### The paper that I used this method:
+### The following paper was written using this method:
 
 Santarosa, L.V., Gastmans, D., Sitolini, T.P. et al. Assessment of groundwater recharge along the Guarani aquifer system outcrop zone in São Paulo State (Brazil): an important tool towards integrated management. Environ Earth Sci 80, 95 (2021). https://doi.org/10.1007/s12665-021-09382-3
