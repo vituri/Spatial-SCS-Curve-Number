@@ -1,6 +1,6 @@
 # Spatial SCS Curve Number
 
-The first step to applying the SCS method is the Curve Number (CN) calculation. In this example, the Land Cover Classification project (https://mapbiomas.org/) and the Soil Grid (250 m) (see how to download here: ) soil texture maps were used to generate a spatial CN using the terra package.
+The first step to applying the SCS method is the Curve Number (CN) calculation. In this example, the Land Cover Classification project (https://mapbiomas.org/) and the Soil Grid (250 m) (see how to download here: https://github.com/lvsantarosa/Soil-Grid-on-Google-Earth-Engine) soil texture maps were used to generate a spatial CN using the terra package.
 
 The complete SCS Methodis disponible in the documents of USDA https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb1044171.pdf
 
