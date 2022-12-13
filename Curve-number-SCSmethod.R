@@ -34,21 +34,22 @@ Silt <- terra::mean(Silt)/1000
 # Reclassify the values into groups occording to textural triangle
 # https://hess.copernicus.org/preprints/hess-2017-13/hess-2017-13.pdf
 
-Sand_m <- matrix(c(0.55, 1   , 10,
-                   0.01, 0.55, 20), ncol = 3, byrow=TRUE)
+Sand_m <- matrix(c(0.50, 1   , 10,
+                   0.01, 0.50, 20), ncol = 3, byrow=TRUE)
 
 Sand_rec <- classify(Sand, Sand_m, include.lowest=TRUE)
 
 
-Clay_m <- matrix(c(0.01, 0.25, 100,
-                   0.25, 0.35, 200,
-                   0.35, 1   , 300), ncol = 3, byrow=TRUE)
+Clay_m <- matrix(c(0.01, 0.20, 100,
+                   0.20, 0.40, 200,
+                   0.40, 1   , 300), ncol = 3, byrow=TRUE)
 
 Clay_rec <- classify(Clay, Clay_m, include.lowest=TRUE)
 
 
-Silt_m <- matrix(c(0.01, 0.75, 1000,
-                   0.75, 1   , 2000), ncol = 3, byrow=TRUE)
+Silt_m <- matrix(c(0.01, 0.30, 1000,
+                   0.30, 0.75, 2000,
+                   0.75, 1   , 3000), ncol = 3, byrow=TRUE)
 
 Silt_rec <- classify(Silt, Silt_m, include.lowest=TRUE)
 
@@ -57,20 +58,18 @@ Silt_rec <- classify(Silt, Silt_m, include.lowest=TRUE)
 Sum_ly <- Sand_rec + Clay_rec + Silt_rec
 
 #Discriminate the groups based in the sum result
-grupos <- rbind(c(1110, 1),
-                c(1220, 1),
-                c(1310, 2),
-                c(1120, 2),
-                c(2120, 2),
-                c(1210, 3),
-                c(1320, 4))
+grupos <- rbind(c(1110, 2),
+                c(1120, 3),
+                c(1220, 3),
+                c(1210, 2),
+                c(1310, 4),
+                c(1320, 4),
+                c(2320, 4),
+                c(2220, 1))
 
 Soil_Hidro <- classify(Sum_ly, grupos)
 
-crs <- "+proj=longlat +datum=WGS84"
-Soil_Hidro <- project(Soil_Hidro, crs)
-
-Soil_Hidro[Soil_Hidro == 0] = NA
+plot(Soil_Hidro)
 
 
 #########################################################################
@@ -80,6 +79,19 @@ Soil_Hidro[Soil_Hidro == 0] = NA
 lista <- list.files('LULC/', full.names = TRUE, pattern = '.tif$')
 
 uses_orig = terra::rast(lista)
+
+Soil_Hidro <- project(Soil_Hidro, uses_orig[[1]])
+
+SH_m <- matrix(c(0   , 0.1, 0,
+                 0.1, 1.5, 1,
+                 1.5, 2.5, 2,
+                 2.5, 3.5, 3,
+                 3.5, 4.5, 4), ncol = 3, byrow=TRUE)
+
+Soil_Hidro <- classify(Soil_Hidro, SH_m, include.lowest=TRUE)
+
+plot(Soil_Hidro)
+hist(Soil_Hidro)
 
 #Reduce the amount of data for easier processing, adjustable as needed (grid). 
 mapbio_resample = terra::resample(uses_orig, Soil_Hidro, method="near") 
@@ -156,6 +168,7 @@ sum_soil_uses = Soil_Hidro + rc_map_scs
 
 cn_final = classify(sum_soil_uses, class_cn)
 
+
 #Names
 Nomes = seq(from = 2000, to = 2021)
 names(cn_final) = Nomes
@@ -176,6 +189,3 @@ terra::writeRaster(Soil_Hidro, "Results/Soil_Hidro.tif", overwrite = TRUE)
 
 ###########################################################
 unlink(x = list.files('temp', full.names = TRUE)) #Delete the temp archives
-
-
-
