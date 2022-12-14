@@ -160,7 +160,8 @@ class_cn <- rbind(c(11,89), c(12,64), c(13,32), c(14,32), c(21,48),
                   c(44,95), c(51,85), c(52,79), c(53,79), c(54,85),
                   c(61,77), c(62,86), c(63,91), c(64,94), c(71,39), 
                   c(72,61), c(73,74), c(74,80), c(101,0), c(102,0),
-                  c(103,0), c(104,0))
+                  c(103,0), c(104,0), c(10,0 ), c(20,0 ), c(30,0 ), 
+                  c(40,0 ), c(50,0 ), c(60,0 ), c(70,0 ), c(100,0))
 
 #Reclassify
 
@@ -189,3 +190,7 @@ terra::writeRaster(Soil_Hidro, "Results/Soil_Hidro.tif", overwrite = TRUE)
 
 ###########################################################
 unlink(x = list.files('temp', full.names = TRUE)) #Delete the temp archives
+
+
+
+
