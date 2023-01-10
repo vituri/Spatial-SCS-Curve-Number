@@ -109,7 +109,7 @@ terra::plot(uses_orig[[1]])
 #100 Water (10, 27,31,33)
 
 
-# multiple replacements
+# Multiple replacements
 class_map_scs <- rbind(c(24,  10), 
                        c(14,  20), c(18, 20), c(19, 20), c(20, 20), c(21, 20), c(36, 20), c(39, 20), c(40, 20), c(41, 20), c(46, 20), c(47, 20), c(48, 20), c(62, 20), 
                        c(1 ,  30), c(3 , 30), c(4 , 30), c(5 , 30), c(49, 30), 
@@ -122,10 +122,10 @@ class_map_scs <- rbind(c(24,  10),
 
 #Reclassify uses based in the matrix
 rc_map_scs = classify(mapbio_resample, class_map_scs)
-
-#Remove 0 
+#Remove zero 
 rc_map_scs[rc_map_scs <= 0] = NA
 
+terra::plot(rc_map_scs[[1]])
 
 #####################CN final##########################
 
@@ -167,7 +167,7 @@ class_cn <- rbind(c(11,89), c(12,92), c(13,94), c(14,95),
 
 #Reclassify
 
-sum_soil_uses = Soil_Hidro + rc_map_scs
+sum_soil_uses = Soil_Hidro_prj + rc_map_scs
 
 cn_final = classify(sum_soil_uses, class_cn)
 
@@ -177,7 +177,7 @@ Nomes = seq(from = 2000, to = 2021)
 names(cn_final) = Nomes
 
 cn_final[cn_final <= 0] = NA
-
+terra::plot(cn_final[[1]])
 
 library(glue)
 library(dplyr)
@@ -187,8 +187,9 @@ filename = glue("Results/CN_{Nomes}.tif")
 cn_final %>% writeRaster(filename = filename, overwrite = TRUE)
 
 #Export soil layer
-Soil_Hidro <- mask(Soil_Hidro, cn_final[[1]])
-terra::writeRaster(Soil_Hidro, "Results/Soil_Hidro.tif", overwrite = TRUE)
+Soil_Hidro_exp <- mask(Soil_Hidro_prj, cn_final[[1]])
+terra::plot(Soil_Hidro_exp)
+terra::writeRaster(Soil_Hidro_exp, "Results/Soil_Hidro.tif", overwrite = TRUE)
 
 ###########################################################
 unlink(x = list.files('temp', full.names = TRUE)) #Delete the temp archives
