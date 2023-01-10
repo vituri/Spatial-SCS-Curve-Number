@@ -75,6 +75,8 @@ grid <- terra::rast(xmin = -53.1, xmax = -47, ymin = -23.5, ymax = -19.7, resolu
 
 Soil_Hidro_prj <- project(Soil_Hidro, grid) %>% terra::as.int()
 
+Soil_Hidro_prj[Soil_Hidro_prj <= 0] = NA
+
 plot(Soil_Hidro_prj)
 hist(Soil_Hidro_prj)
 
@@ -88,13 +90,14 @@ list <- list.files('LULC/', full.names = TRUE, pattern = '.tif$')
 uses <- list()
 for(i in 1:length(list)) {
   uses[[i]] <- terra::rast(list[i]) %>% 
-               terra::resample(Soil_Hidro_prj) %>%  
+               terra::resample(Soil_Hidro_prj) %>% 
                terra::as.int()
   print(uses[[i]])
 }
 
 mapbio_resample = terra::rast(uses)
-terra::plot(uses_orig[[1]])
+mapbio_resample[mapbio_resample <= 0] = NA
+terra::plot(mapbio_resample[[1]])
 
 # MAPBIOMAS land use values to be reclassified as SCS method
 # There are different classes depending on the MAPBIOMAS collection. 
@@ -122,8 +125,7 @@ class_map_scs <- rbind(c(24,  10),
 
 #Reclassify uses based in the matrix
 rc_map_scs = classify(mapbio_resample, class_map_scs)
-#Remove zero 
-rc_map_scs[rc_map_scs <= 0] = NA
+rc_map_scs[rc_map_scs < 10] = NA
 
 terra::plot(rc_map_scs[[1]])
 
@@ -176,7 +178,7 @@ cn_final = classify(sum_soil_uses, class_cn)
 Nomes = seq(from = 2000, to = 2021)
 names(cn_final) = Nomes
 
-cn_final[cn_final <= 0] = NA
+cn_final[cn_final < 30] = NA
 terra::plot(cn_final[[1]])
 
 library(glue)
