@@ -131,17 +131,6 @@ rc_map_scs[rc_map_scs <= 0] = NA
 
 # Values based in the method => https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb1044171.pdf
 
-#	SCS method values 				
-#	Uses/Soil     A	  B	  C	  D
-#	Urban	        89	92	94	95
-#	Crops	        64	75	82	85
-#	Wood	        32	58	72	79
-#	Silviculture	32	58	72	79
-#	Herbaceus	    48	62	71	85
-#	Bare Soil	    77	86	91	94
-#	Pasture	      39	61	74	80
-#	No Data	      0	  0	  0	  0
-
 #	Sum Soil and Land Use -> to reclassify using the SCS values above				
 #	Uses/Soil	    A	  B	  C	  D
 #	Urban	        11	12	13	14
@@ -153,15 +142,28 @@ rc_map_scs[rc_map_scs <= 0] = NA
 #	Pasture	      71	72	73	74
 #	No Data	      101	102	103	104
 
+#	SCS method values 				
+#	Uses/Soil     A	  B	  C	  D
+#	Urban	        89	92	94	95
+#	Crops	        64	75	82	85
+#	Florest	      32	58	72	79
+#	Silviculture	32	58	72	79
+#	Herbaceus	    48	62	71	85
+#	Bare Soil	    77	86	91	94
+#	Pasture	      39	61	74	80
+#	No Data	      0	  0	  0	  0
 
-class_cn <- rbind(c(11,89), c(12,64), c(13,32), c(14,32), c(21,48),
-                  c(22,92), c(23,75), c(24,58), c(31,58), c(32,62),
-                  c(33,94), c(34,82), c(41,72), c(42,72), c(43,71),
-                  c(44,95), c(51,85), c(52,79), c(53,79), c(54,85),
-                  c(61,77), c(62,86), c(63,91), c(64,94), c(71,39), 
-                  c(72,61), c(73,74), c(74,80), c(101,0), c(102,0),
-                  c(103,0), c(104,0), c(10,0 ), c(20,0 ), c(30,0 ), 
-                  c(40,0 ), c(50,0 ), c(60,0 ), c(70,0 ), c(100,0))
+
+class_cn <- rbind(c(11,89), c(12,92), c(13,94), c(14,95), 
+                  c(21,48), c(22,92), c(23,75), c(24,58), 
+                  c(31,58), c(32,62), c(33,94), c(34,82), 
+                  c(41,72), c(42,72), c(43,71), c(44,95), 
+                  c(51,85), c(52,79), c(53,79), c(54,85),
+                  c(61,77), c(62,86), c(63,91), c(64,94), 
+                  c(71,39), c(72,61), c(73,74), c(74,80), 
+                  c(101,0), c(102,0), c(103,0), c(104,0), 
+                  c(10,0 ), c(20,0 ), c(30,0 ), c(40,0 ), 
+                  c(50,0 ), c(60,0 ), c(70,0 ), c(100,0))
 
 #Reclassify
 
