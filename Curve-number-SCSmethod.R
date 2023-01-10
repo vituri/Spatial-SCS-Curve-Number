@@ -6,6 +6,7 @@
 #Land use from the Mapbiomas Landsat classification collection, from GEE: https://mapbiomas.org/
 
 library(terra)    
+library(tidyverse)
 
 dir.create(path = 'temp', showWarnings = FALSE) #To create a temp directory to exclude in the final
 
@@ -68,33 +69,32 @@ grupos <- rbind(c(1110, 2),
                 c(2220, 1))
 
 Soil_Hidro <- classify(Sum_ly, grupos)
-
 plot(Soil_Hidro)
+
+grid <- terra::rast(xmin = -53.1, xmax = -47, ymin = -23.5, ymax = -19.7, resolution = c(0.0025, .0025))
+
+Soil_Hidro_prj <- project(Soil_Hidro, grid) %>% terra::as.int()
+
+plot(Soil_Hidro_prj)
+hist(Soil_Hidro_prj)
 
 
 #########################################################################
 ################################## LULC #################################
 #########################################################################
 
-lista <- list.files('LULC/', full.names = TRUE, pattern = '.tif$')
+list <- list.files('LULC/', full.names = TRUE, pattern = '.tif$')
 
-uses_orig = terra::rast(lista)
+uses <- list()
+for(i in 1:length(list)) {
+  uses[[i]] <- terra::rast(list[i]) %>% 
+               terra::resample(Soil_Hidro_prj) %>%  
+               terra::as.int()
+  print(uses[[i]])
+}
 
-Soil_Hidro <- project(Soil_Hidro, uses_orig[[1]])
-
-SH_m <- matrix(c(0   , 0.1, 0,
-                 0.1, 1.5, 1,
-                 1.5, 2.5, 2,
-                 2.5, 3.5, 3,
-                 3.5, 4.5, 4), ncol = 3, byrow=TRUE)
-
-Soil_Hidro <- classify(Soil_Hidro, SH_m, include.lowest=TRUE)
-
-plot(Soil_Hidro)
-hist(Soil_Hidro)
-
-#Reduce the amount of data for easier processing, adjustable as needed (grid). 
-mapbio_resample = terra::resample(uses_orig, Soil_Hidro, method="near") 
+mapbio_resample = terra::rast(uses)
+terra::plot(uses_orig[[1]])
 
 # MAPBIOMAS land use values to be reclassified as SCS method
 # There are different classes depending on the MAPBIOMAS collection. 
@@ -110,13 +110,13 @@ mapbio_resample = terra::resample(uses_orig, Soil_Hidro, method="near")
 
 
 # multiple replacements
-class_map_scs <- rbind(c(24, 10), 
-                       c(14, 20),c(18, 20), c(19, 20), c(20, 20), c(21, 20), c(36, 20), c(39, 20), c(40, 20), c(41, 20), c(46, 20), c(47, 20), c(62, 20), 
-                       c(1, 30), c(3, 30), c(4, 30), c(5, 30), c(49, 30), 
-                       c(9, 40), 
-                       c(12, 50), c(13, 50), c(32, 50), c(50, 50), 
-                       c(23, 60), c(25, 60), c(29, 60), c(30, 60),
-                       c(15, 70),
+class_map_scs <- rbind(c(24,  10), 
+                       c(14,  20), c(18, 20), c(19, 20), c(20, 20), c(21, 20), c(36, 20), c(39, 20), c(40, 20), c(41, 20), c(46, 20), c(47, 20), c(48, 20), c(62, 20), 
+                       c(1 ,  30), c(3 , 30), c(4 , 30), c(5 , 30), c(49, 30), 
+                       c(9 ,  40), 
+                       c(12,  50), c(13, 50), c(32, 50), c(50, 50), 
+                       c(23,  60), c(25, 60), c(29, 60), c(30, 60),
+                       c(15,  70),
                        c(11, 100), c(27, 100), c(31, 100), c(33, 100))
 
 
@@ -192,7 +192,3 @@ terra::writeRaster(Soil_Hidro, "Results/Soil_Hidro.tif", overwrite = TRUE)
 
 ###########################################################
 unlink(x = list.files('temp', full.names = TRUE)) #Delete the temp archives
-
-
-
-
