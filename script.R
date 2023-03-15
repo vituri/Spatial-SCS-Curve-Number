@@ -77,7 +77,13 @@ soiltexture::TT.plot(
 
 # see https://www.biologysimulations.com/post/how-to-use-the-soil-texture-triangle
 calculate_textural_triangle = function(clay, sand, silt) {
-  case_when(
+
+  # browser()
+  glue('clay: length {length(clay)}; mean: {mean(clay)}; class {class(clay)}; dim {dim(clay)}', .na = 'NA', .null = 'NULL') %>% print()
+  glue('sand: length {length(sand)}; mean: {mean(sand)}; class {class(sand)}; dim {dim(sand)}', .na = 'NA', .null = 'NULL') %>% print()
+  glue('silt: length {length(silt)}; mean: {mean(silt)}; class {class(silt)}; dim {dim(silt)}', .na = 'NA', .null = 'NULL') %>% print()
+
+  dplyr::case_when(
 
     clay <= 0.05 & sand <= 0.05 & silt <= 0.05 ~ 0
 
@@ -96,7 +102,9 @@ calculate_textural_triangle = function(clay, sand, silt) {
   )
 }
 
-soil_classified = terra::app(soil, fun = function(x) calculate_textural_triangle(clay = x[, 1], sand = x[,2], silt = x[,3]))
+soil_classified = terra::app(
+  soil, fun = function(x) calculate_textural_triangle(clay = x[, 1], sand = x[,2], silt = x[,3])
+  )
 soil_classified %>% plot()
 
 grid <- terra::rast(xmin = -53.1, xmax = -47, ymin = -23.5, ymax = -19.7, resolution = c(0.0025, .0025))
