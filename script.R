@@ -78,7 +78,10 @@ soiltexture::TT.plot(
 # see https://www.biologysimulations.com/post/how-to-use-the-soil-texture-triangle
 calculate_textural_triangle = function(clay, sand, silt) {
   case_when(
-    clay >= 0.35 ~ 4
+
+    clay <= 0.05 & sand <= 0.05 & silt <= 0.05 ~ 0
+
+    ,clay >= 0.35 ~ 4
     ,clay >= 0.25 & sand <= 0.45 ~ 4
 
     ,clay >= 0.2 & silt <= 0.275 ~ 3
