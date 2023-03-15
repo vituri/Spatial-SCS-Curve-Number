@@ -1,32 +1,45 @@
-#Convert land use and soil to curve number to use in SCS method, 
-#conversion of rain to effective runoff. Method developed by the USDA 
+#Convert land use and soil to curve number to use in SCS method,
+#conversion of rain to effective runoff. Method developed by the USDA
 #(https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb1044171.pdf)
 
 #Data:
 #Land use from the Mapbiomas Landsat classification collection, from GEE: https://mapbiomas.org/
 
-library(terra)    
+library(terra)
 library(tidyverse)
 
 dir.create(path = 'temp', showWarnings = FALSE) #To create a temp directory to exclude in the final
 
 terraOptions(tempdir = 'temp')
 
+dir.create('Soil', showWarnings = FALSE)
+
+tribble(
+  ~url, ~destfile
+  ,'https://drive.google.com/uc?export=download&id=1hP7rAqOD17xhMD_7uFI9IMEOprBvkvnu', 'Soil/clay.tif'
+)
+
+download.file(url = 'https://drive.google.com/uc?export=download&id=1hP7rAqOD17xhMD_7uFI9IMEOprBvkvnu', destfile = 'Soil/clay.tif')
+download.file(url = 'https://drive.google.com/uc?export=download&id=1Qw8y_IjzK8l384oUU_PX7BB4a2i7_J31', destfile = 'Soil/sand.tif')
+download.file(url = 'https://drive.google.com/uc?export=download&id=1YMzLPDt7weEbSg4x5mk28tiqqux8sdO2', destfile = 'Soil/silt.tif')
 
 #########################################################################
 ############################# Soil raster ###############################
 #########################################################################
 
-#SCS Soil group from SCS method	A = (1)	B = (2)	C = (3)	D = (4) 
+#SCS Soil group from SCS method	A = (1)	B = (2)	C = (3)	D = (4)
 # Layers from Soil Grid
 # See my script to download in Google Earth Engine
 # https://github.com/lvsantarosa/Soil-Grid-on-Google-Earth-Engine
 
-Clay <- terra::rast('Soil/clay.tif')
-Sand <- terra::rast('Soil/sand.tif')
-Silt <- terra::rast('Soil/silt.tif')
+soil = c(
+  terra::rast('Soil/clay.tif') %>% mean()
+  ,terra::rast('Soil/sand.tif') %>% mean()
+  ,terra::rast('Soil/silt.tif') %>% mean()
+) / 1000
 
-#Convert to percentage
+plot(soil)
+
 
 Clay <- terra::mean(Clay)/1000
 Sand <- terra::mean(Sand)/1000
@@ -89,8 +102,8 @@ list <- list.files('LULC/', full.names = TRUE, pattern = '.tif$')
 
 uses <- list()
 for(i in 1:length(list)) {
-  uses[[i]] <- terra::rast(list[i]) %>% 
-               terra::resample(Soil_Hidro_prj) %>% 
+  uses[[i]] <- terra::rast(list[i]) %>%
+               terra::resample(Soil_Hidro_prj) %>%
                terra::as.int()
   print(uses[[i]])
 }
@@ -100,7 +113,7 @@ mapbio_resample[mapbio_resample <= 0] = NA
 terra::plot(mapbio_resample[[1]])
 
 # MAPBIOMAS land use values to be reclassified as SCS method
-# There are different classes depending on the MAPBIOMAS collection. 
+# There are different classes depending on the MAPBIOMAS collection.
 
 #10	Urban (24)
 #20	Agriculture (14, 18, 19, 20, 21, 36, 39, 40, 41, 46, 47, 48, 62)
@@ -113,11 +126,11 @@ terra::plot(mapbio_resample[[1]])
 
 
 # Multiple replacements
-class_map_scs <- rbind(c(24,  10), 
-                       c(14,  20), c(18, 20), c(19, 20), c(20, 20), c(21, 20), c(36, 20), c(39, 20), c(40, 20), c(41, 20), c(46, 20), c(47, 20), c(48, 20), c(62, 20), 
-                       c(1 ,  30), c(3 , 30), c(4 , 30), c(5 , 30), c(49, 30), 
-                       c(9 ,  40), 
-                       c(12,  50), c(13, 50), c(32, 50), c(50, 50), 
+class_map_scs <- rbind(c(24,  10),
+                       c(14,  20), c(18, 20), c(19, 20), c(20, 20), c(21, 20), c(36, 20), c(39, 20), c(40, 20), c(41, 20), c(46, 20), c(47, 20), c(48, 20), c(62, 20),
+                       c(1 ,  30), c(3 , 30), c(4 , 30), c(5 , 30), c(49, 30),
+                       c(9 ,  40),
+                       c(12,  50), c(13, 50), c(32, 50), c(50, 50),
                        c(23,  60), c(25, 60), c(29, 60), c(30, 60),
                        c(15,  70),
                        c(11, 100), c(27, 100), c(31, 100), c(33, 100))
@@ -133,7 +146,7 @@ terra::plot(rc_map_scs[[1]])
 
 # Values based in the method => https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb1044171.pdf
 
-#	Sum Soil and Land Use -> to reclassify using the SCS values above				
+#	Sum Soil and Land Use -> to reclassify using the SCS values above
 #	Uses/Soil	    A	  B	  C	  D
 #	Urban	        11	12	13	14
 #	Crops	        21	22	23	24
@@ -144,7 +157,7 @@ terra::plot(rc_map_scs[[1]])
 #	Pasture	      71	72	73	74
 #	No Data	      101	102	103	104
 
-#	SCS method values 				
+#	SCS method values
 #	Uses/Soil     A	  B	  C	  D
 #	Urban	        89	92	94	95
 #	Crops	        64	75	82	85
@@ -156,15 +169,15 @@ terra::plot(rc_map_scs[[1]])
 #	No Data	      0	  0	  0	  0
 
 
-class_cn <- rbind(c(11,89), c(12,92), c(13,94), c(14,95), 
-                  c(21,64), c(22,75), c(23,82), c(24,85), 
-                  c(31,30), c(32,55), c(33,70), c(34,77), 
-                  c(41,45), c(42,66), c(43,77), c(44,86), 
+class_cn <- rbind(c(11,89), c(12,92), c(13,94), c(14,95),
+                  c(21,64), c(22,75), c(23,82), c(24,85),
+                  c(31,30), c(32,55), c(33,70), c(34,77),
+                  c(41,45), c(42,66), c(43,77), c(44,86),
                   c(51,48), c(52,62), c(53,71), c(54,85),
-                  c(61,77), c(62,86), c(63,91), c(64,94), 
-                  c(71,39), c(72,61), c(73,74), c(74,80), 
-                  c(101,0), c(102,0), c(103,0), c(104,0), 
-                  c(10,0 ), c(20,0 ), c(30,0 ), c(40,0 ), 
+                  c(61,77), c(62,86), c(63,91), c(64,94),
+                  c(71,39), c(72,61), c(73,74), c(74,80),
+                  c(101,0), c(102,0), c(103,0), c(104,0),
+                  c(10,0 ), c(20,0 ), c(30,0 ), c(40,0 ),
                   c(50,0 ), c(60,0 ), c(70,0 ), c(100,0))
 
 #Reclassify
