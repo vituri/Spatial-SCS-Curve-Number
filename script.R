@@ -112,9 +112,9 @@ list <- list.files('LULC/', full.names = TRUE, pattern = '.tif$')
 
 uses <- list()
 for(i in 1:length(list)) {
-  uses[[i]] <- terra::rast(list[i]) %>%
-    terra::resample(Soil_Hidro_prj) %>%
-    terra::as.int()
+  uses[[i]] <- terra::rast(list[i]) %>% 
+               terra::resample(soil_final) %>% 
+               terra::as.int()
   print(uses[[i]])
 }
 
@@ -123,7 +123,7 @@ mapbio_resample[mapbio_resample <= 0] = NA
 terra::plot(mapbio_resample[[1]])
 
 # MAPBIOMAS land use values to be reclassified as SCS method
-# There are different classes depending on the MAPBIOMAS collection.
+# There are different classes depending on the MAPBIOMAS collection. 
 
 #10	Urban (24)
 #20	Agriculture (14, 18, 19, 20, 21, 36, 39, 40, 41, 46, 47, 48, 62)
@@ -136,11 +136,11 @@ terra::plot(mapbio_resample[[1]])
 
 
 # Multiple replacements
-class_map_scs <- rbind(c(24,  10),
-                       c(14,  20), c(18, 20), c(19, 20), c(20, 20), c(21, 20), c(36, 20), c(39, 20), c(40, 20), c(41, 20), c(46, 20), c(47, 20), c(48, 20), c(62, 20),
-                       c(1 ,  30), c(3 , 30), c(4 , 30), c(5 , 30), c(49, 30),
-                       c(9 ,  40),
-                       c(12,  50), c(13, 50), c(32, 50), c(50, 50),
+class_map_scs <- rbind(c(24,  10), 
+                       c(14,  20), c(18, 20), c(19, 20), c(20, 20), c(21, 20), c(36, 20), c(39, 20), c(40, 20), c(41, 20), c(46, 20), c(47, 20), c(48, 20), c(62, 20), 
+                       c(1 ,  30), c(3 , 30), c(4 , 30), c(5 , 30), c(49, 30), 
+                       c(9 ,  40), 
+                       c(12,  50), c(13, 50), c(32, 50), c(50, 50), 
                        c(23,  60), c(25, 60), c(29, 60), c(30, 60),
                        c(15,  70),
                        c(11, 100), c(27, 100), c(31, 100), c(33, 100))
@@ -156,7 +156,7 @@ terra::plot(rc_map_scs[[1]])
 
 # Values based in the method => https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb1044171.pdf
 
-#	Sum Soil and Land Use -> to reclassify using the SCS values above
+#	Sum Soil and Land Use -> to reclassify using the SCS values above				
 #	Uses/Soil	    A	  B	  C	  D
 #	Urban	        11	12	13	14
 #	Crops	        21	22	23	24
@@ -167,7 +167,7 @@ terra::plot(rc_map_scs[[1]])
 #	Pasture	      71	72	73	74
 #	No Data	      101	102	103	104
 
-#	SCS method values
+#	SCS method values 				
 #	Uses/Soil     A	  B	  C	  D
 #	Urban	        89	92	94	95
 #	Crops	        64	75	82	85
@@ -179,23 +179,27 @@ terra::plot(rc_map_scs[[1]])
 #	No Data	      0	  0	  0	  0
 
 
-class_cn <- rbind(c(11,89), c(12,92), c(13,94), c(14,95),
-                  c(21,64), c(22,75), c(23,82), c(24,85),
-                  c(31,30), c(32,55), c(33,70), c(34,77),
-                  c(41,45), c(42,66), c(43,77), c(44,86),
+class_cn <- rbind(c(11,89), c(12,92), c(13,94), c(14,95), 
+                  c(21,64), c(22,75), c(23,82), c(24,85), 
+                  c(31,30), c(32,55), c(33,70), c(34,77), 
+                  c(41,45), c(42,66), c(43,77), c(44,86), 
                   c(51,48), c(52,62), c(53,71), c(54,85),
-                  c(61,77), c(62,86), c(63,91), c(64,94),
-                  c(71,39), c(72,61), c(73,74), c(74,80),
-                  c(101,0), c(102,0), c(103,0), c(104,0),
-                  c(10,0 ), c(20,0 ), c(30,0 ), c(40,0 ),
+                  c(61,77), c(62,86), c(63,91), c(64,94), 
+                  c(71,39), c(72,61), c(73,74), c(74,80), 
+                  c(101,0), c(102,0), c(103,0), c(104,0), 
+                  c(10,0 ), c(20,0 ), c(30,0 ), c(40,0 ), 
                   c(50,0 ), c(60,0 ), c(70,0 ), c(100,0))
 
 #Reclassify
 
-sum_soil_uses = Soil_Hidro_prj + rc_map_scs
+sum_soil_uses = soil_final + rc_map_scs
 
 cn_final = classify(sum_soil_uses, class_cn)
 
+#Export soil layer
+Soil_Hidro_exp <- mask(soil_final, cn_final[[1]])
+terra::plot(Soil_Hidro_exp)
+terra::writeRaster(Soil_final, "Results/Soil_Hidro.tif", overwrite = TRUE)
 
 #Names
 Nomes = seq(from = 2000, to = 2021)
@@ -210,11 +214,6 @@ library(dplyr)
 #Export in different archives
 filename = glue("Results/CN_{Nomes}.tif")
 cn_final %>% writeRaster(filename = filename, overwrite = TRUE)
-
-#Export soil layer
-Soil_Hidro_exp <- mask(Soil_Hidro_prj, cn_final[[1]])
-terra::plot(Soil_Hidro_exp)
-terra::writeRaster(Soil_Hidro_exp, "Results/Soil_Hidro.tif", overwrite = TRUE)
 
 ###########################################################
 unlink(x = list.files('temp', full.names = TRUE)) #Delete the temp archives
