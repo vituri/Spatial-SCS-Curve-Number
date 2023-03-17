@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Lucas Vituri Santarosa" />
+
+<meta name="date" content="2023-03-17" />
+
+<title>Soil analysis</title>
+
+<script src="index_files/header-attrs-2.20/header-attrs.js"></script>
+<script src="index_files/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="index_files/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="index_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="index_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="index_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="index_files/navigation-1.1/tabsets.js"></script>
+<link href="index_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="index_files/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Soil analysis</h1>
+<h4 class="author">Lucas Vituri Santarosa</h4>
+<h4 class="date">2023-03-17</h4>
+
+</div>
+
+
+<pre class="r"><code>knitr::opts_chunk$set(echo = TRUE, warning = FALSE, cache = TRUE, fig.width = 12)</code></pre>
+<div id="loading-libraries" class="section level2">
+<h2>Loading libraries</h2>
+<pre class="r"><code>library(dplyr); library(purrr); library(glue)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(terra)</code></pre>
+<pre><code>## terra 1.6.17</code></pre>
+<pre><code>## 
+## Attaching package: &#39;terra&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:glue&#39;:
+## 
+##     trim</code></pre>
+</div>
+<div id="downloading-the-data" class="section level2">
+<h2>Downloading the data</h2>
+<p>Download the directories <strong>Soil</strong> and
+<strong>LULC</strong> from <a
+href="https://drive.google.com/drive/folders/18IXMdb04XiotG8TqD081JJGZex7gmJFP">this
+google drive</a> and unzip them in your project folder.</p>
+<pre class="r"><code># check if the folders exist and are non-empty
+
+c(&#39;Soil&#39;, &#39;LULC&#39;) %&gt;% 
+  walk(\(x) {
+    if (!dir.exists(x)) {
+      glue(&#39;Directory {x} does not exist! Download it using the link above&#39;) %&gt;% print()
+    } else if (length(list.files(x)) == 0) {
+      glue(&#39;No files found at {x}! Did you unzip it correctly?&#39;) %&gt;% print()
+    } else {
+      glue(&#39;{x} looks fine!&#39;) %&gt;% print()
+    }
+  })</code></pre>
+<pre><code>## Soil looks fine!
+## LULC looks fine!</code></pre>
+<p>Set a directory that will be used to store all the temp files
+generated by <code>terra</code></p>
+<pre class="r"><code>temp_directory_path = &#39;temp&#39;
+dir.create(path = temp_directory_path, showWarnings = FALSE) 
+terraOptions(tempdir = temp_directory_path)</code></pre>
+</div>
+<div id="preparing-the-soil" class="section level2">
+<h2>Preparing the soil</h2>
+<p>Read the three layers of soil type</p>
+<pre class="r"><code>soil = c(
+  terra::rast(&#39;Soil/clay.tif&#39;) %&gt;% mean()
+  ,terra::rast(&#39;Soil/sand.tif&#39;) %&gt;% mean()
+  ,terra::rast(&#39;Soil/silt.tif&#39;) %&gt;% mean()
+) / 1000
+
+names(soil) = c(&#39;clay&#39;, &#39;sand&#39;, &#39;silt&#39;)
+soil</code></pre>
+<pre><code>## class       : SpatRaster 
+## dimensions  : 2982, 4232, 3  (nrow, ncol, nlyr)
+## resolution  : 250, 250  (x, y)
+## extent      : -5192265, -4134265, -3114462, -2368962  (xmin, xmax, ymin, ymax)
+## coord. ref. : World_Mollweide 
+## source      : memory 
+## names       :      clay,   sand,   silt 
+## min values  : 0.0000000, 0.0000, 0.0000 
+## max values  : 0.7491667, 0.8335, 0.4915</code></pre>
+<pre class="r"><code># plot the layers
+plot(soil)</code></pre>
+<p><img src="index_files/figure-html/plot%20soil-1.png" width="1152" /></p>
+<p>Notice that the sum of the three layers should be approximately 1</p>
+<pre class="r"><code>sum(soil) %&gt;% plot()</code></pre>
+<p><img src="index_files/figure-html/sum%20soil-1.png" width="1152" /></p>
+<p>Define a function that, given the % of clay, sand and silt,
+calculates the type of soil. Check <a
+href="https://www.biologysimulations.com/post/how-to-use-the-soil-texture-triangle"
+class="uri">https://www.biologysimulations.com/post/how-to-use-the-soil-texture-triangle</a>
+for more details.</p>
+<pre class="r"><code>calculate_textural_triangle = function(clay, sand, silt) {
+
+  dplyr::case_when(
+
+    clay &lt;= 0.05 &amp; sand &lt;= 0.05 &amp; silt &lt;= 0.05 ~ 0
+
+    ,clay &gt;= 0.35 ~ 4
+    ,clay &gt;= 0.25 &amp; sand &lt;= 0.45 ~ 4
+
+    ,clay &gt;= 0.2 &amp; silt &lt;= 0.275 ~ 3
+
+    ,silt &lt;= 0.5 ~ 2
+
+    ,clay &lt;= 0.075 ~ 1
+
+    ,sand &lt;= 0.575 ~ 2
+
+    ,TRUE ~ 1
+  )
+}</code></pre>
+<p>Now classify the soil using the above function</p>
+<pre class="r"><code>soil_classified = terra::app(
+  soil, fun = function(x) calculate_textural_triangle(clay = x[,1], sand = x[,2], silt = x[,3])
+  )
+soil_classified %&gt;% plot()</code></pre>
+<p><img src="index_files/figure-html/classify%20soil-1.png" width="1152" /></p>
+<p>And finally reshape the raster</p>
+<pre class="r"><code># reshape the soil
+grid &lt;- terra::rast(xmin = -53.1, xmax = -47, ymin = -23.5, ymax = -19.7, resolution = c(0.0025, .0025))
+soil_final = project(soil_classified, grid) %&gt;% terra::as.int()
+soil_final</code></pre>
+<pre><code>## class       : SpatRaster 
+## dimensions  : 1520, 2440, 1  (nrow, ncol, nlyr)
+## resolution  : 0.0025, 0.0025  (x, y)
+## extent      : -53.1, -47, -23.5, -19.7  (xmin, xmax, ymin, ymax)
+## coord. ref. : lon/lat WGS 84 
+## source      : memory 
+## name        : lyr.1 
+## min value   :     0 
+## max value   :     4</code></pre>
+<pre class="r"><code>soil_final %&gt;% plot()</code></pre>
+<p><img src="index_files/figure-html/plot%20soil%20final-1.png" width="1152" /></p>
+</div>
+<div id="lulc" class="section level2">
+<h2>LULC</h2>
+<p>………………</p>
+</div>
+<div id="cleaning" class="section level2">
+<h2>Cleaning</h2>
+<pre class="r"><code>unlink(temp_directory_path, recursive = TRUE)</code></pre>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
